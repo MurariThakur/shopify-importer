@@ -73,6 +73,12 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'db' => [
+            'driver' => 'custom',
+            'via'    => App\Logging\DatabaseLogger::class,
+            'level'  => 'debug',
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
