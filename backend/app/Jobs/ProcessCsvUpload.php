@@ -48,6 +48,11 @@ class ProcessCsvUpload implements ShouldQueue
             throw new FileNotFoundException("CSV file not found: {$path}");
         }
 
+        if (filesize($path) === 0) {
+            $this->failUpload('The uploaded CSV file is empty.');
+            return;
+        }
+
         $handle = fopen($path, 'r');
         $header = fgetcsv($handle);
 
@@ -55,6 +60,12 @@ class ProcessCsvUpload implements ShouldQueue
             fclose($handle);
             $this->failUpload('CSV file has no header row.');
             return;
+        }
+
+        $header = array_map('trim', $header);
+
+        if (!empty($header[0])) {
+            $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
         }
 
         $missingColumns = array_diff(self::REQUIRED_COLUMNS, $header);
@@ -65,7 +76,6 @@ class ProcessCsvUpload implements ShouldQueue
             return;
         }
 
-        $header = array_map('trim', $header);
         $rowNumber = 0;
         $totalRows = 0;
 
@@ -102,7 +112,7 @@ class ProcessCsvUpload implements ShouldQueue
                     'raw_data'      => $rawData,
                 ]);
 
-                Log::channel('db')->warning('Row validation failed', [
+                Log::channel('db')->error('Row validation failed', [
                     'upload_id' => $this->upload->id,
                     'context'   => ['row' => $rowNumber, 'errors' => $validationErrors],
                 ]);

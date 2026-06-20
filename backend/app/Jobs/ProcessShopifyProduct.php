@@ -54,6 +54,12 @@ class ProcessShopifyProduct implements ShouldQueue
                         'alt'              => $row['Image Alt Text'] ?? '',
                         'mediaContentType' => 'IMAGE',
                     ];
+                } elseif (!empty($row['Image Src'])) {
+                    Log::channel('db')->error('Invalid image URL, skipping media', [
+                        'upload_id'         => $this->productImport->upload_id,
+                        'product_import_id' => $this->productImport->id,
+                        'context'           => ['image_src' => $row['Image Src'], 'handle' => $handle],
+                    ]);
                 }
 
                 $result = $shopify->createProduct($productInput, $media);
