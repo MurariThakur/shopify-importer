@@ -89,8 +89,8 @@ export function UploadProvider({ children }) {
 
   return (
     <UploadContext.Provider value={{
-      uploads, currentUpload, products, liveStatus,
-      pagination, productPagination, loading, error,
+      uploads, setUploads, currentUpload, setCurrentUpload, products, liveStatus,
+      pagination, setPagination, productPagination, loading, error,
       fetchUploads, fetchUpload, fetchStatus, fetchProducts,
       submitUpload, clearError,
     }}>

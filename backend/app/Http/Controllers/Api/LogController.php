@@ -18,7 +18,7 @@ class LogController extends Controller
             $query->where('level', $request->level);
         }
 
-        $logs = $query->paginate(50);
+        $logs = $query->paginate(25);
 
         return ImportLogResource::collection($logs);
     }
@@ -31,7 +31,7 @@ class LogController extends Controller
             $query->where('level', $request->level);
         }
 
-        $logs = $query->paginate(50);
+        $logs = $query->paginate(25);
 
         return ImportLogResource::collection($logs);
     }

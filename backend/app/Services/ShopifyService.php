@@ -128,15 +128,18 @@ class ShopifyService
         GQL;
 
         $inventoryItem = [
-            'sku'              => !empty($row['Variant SKU']) ? $row['Variant SKU'] : null,
             'requiresShipping' => filter_var($row['Variant Requires Shipping'] ?? 'true', FILTER_VALIDATE_BOOLEAN),
         ];
+
+        if (!empty($row['Variant SKU'])) {
+            $inventoryItem['sku'] = $row['Variant SKU'];
+        }
 
         if (!empty($row['Variant Weight'])) {
             $inventoryItem['measurement'] = [
                 'weight' => [
                     'value' => (float) $row['Variant Weight'],
-                    'unit'  => strtoupper($row['Variant Weight Unit'] ?? 'KILOGRAMS'),
+                    'unit'  => $this->normalizeWeightUnit($row['Variant Weight Unit'] ?? ''),
                 ],
             ];
         }
@@ -241,5 +244,30 @@ class ShopifyService
             $msg = collect($result['userErrors'])->map(fn($e) => "{$e['field']}: {$e['message']}")->implode('; ');
             throw new ShopifyApiException("Collection add userErrors: {$msg}");
         }
+    }
+
+    private function normalizeWeightUnit(string $unit): string
+    {
+        $unit = strtoupper(trim($unit));
+
+        $map = [
+            'KG'         => 'KILOGRAMS',
+            'KGS'        => 'KILOGRAMS',
+            'KILOGRAM'   => 'KILOGRAMS',
+            'KILOGRAMS'  => 'KILOGRAMS',
+            'G'          => 'GRAMS',
+            'GR'         => 'GRAMS',
+            'GRAM'       => 'GRAMS',
+            'GRAMS'      => 'GRAMS',
+            'LB'         => 'POUNDS',
+            'LBS'        => 'POUNDS',
+            'POUND'      => 'POUNDS',
+            'POUNDS'     => 'POUNDS',
+            'OZ'         => 'OUNCES',
+            'OUNCE'      => 'OUNCES',
+            'OUNCES'     => 'OUNCES',
+        ];
+
+        return $map[$unit] ?? 'KILOGRAMS';
     }
 }
